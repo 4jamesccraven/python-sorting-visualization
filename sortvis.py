@@ -1,6 +1,7 @@
 from pygame import Color
 from typing import Generator
 
+MARKED = Color(229, 242, 13)
 SELECTED = Color(15, 233, 0)
 SORTED = Color(255, 255, 255)
 UNSORTED = Color(0, 0, 0)
@@ -48,4 +49,28 @@ def bubble(vals: list[int]) -> VisSteps:
             break
 
 
-__all__ = ['insertion', 'bubble']
+def selection(vals: list[str]) -> VisSteps:
+    for i in range(99):
+        min_index = i
+        for j in range(i + 1, 100):
+            if vals[min_index] > vals[j]:
+                min_index = j
+
+            yielded = [(val, UNSORTED) if idx > i - 1
+                       else (val, SORTED)
+                       for idx, val in enumerate(vals)]
+
+            yielded = [val if idx != j
+                       else (val[0], SELECTED)
+                       for idx, val in enumerate(yielded)]
+
+            yielded = [val if idx != min_index
+                       else (val[0], MARKED)
+                       for idx, val in enumerate(yielded)]
+
+            yield yielded
+
+        vals[i], vals[min_index] = vals[min_index], vals[i]
+
+
+__all__ = ['insertion', 'bubble', 'selection']

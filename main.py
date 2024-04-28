@@ -6,6 +6,9 @@ from dataclasses import dataclass
 
 @dataclass
 class drawable:
+    '''
+    An area that can be drawn to
+    '''
     left: int
     right: int
     width: int
@@ -32,6 +35,18 @@ def render_curr_state(state: list[tuple[int, pg.Color]],
                             height)
 
         pg.draw.rect(WINDOW, color, rect)
+
+
+def pause() -> None:
+    '''
+    Pauses the program.
+    '''
+
+    while True:
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE or event.key == pg.K_p:
+                    return
 
 
 def main() -> None:
@@ -81,9 +96,10 @@ def main() -> None:
             choose_algo = False
             list = [i for i in range(100)]
             shuffle(list)
-            algorithm = sortvis.bubble(list)
+            algorithm = sortvis.selection(list)
             ...
 
+        # Visualization in progress
         if not visualisation_done and not choose_algo:
             try:
                 curr_state = next(algorithm)
@@ -92,13 +108,21 @@ def main() -> None:
                 visualisation_done = True
                 prev_state = [(val, pg.Color(255, 255, 255)) for val in list]
 
+        # Continue rendering sorted values waiting for user
         else:
             render_curr_state(prev_state, draw, WINDOW)
 
+        # Input handling
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 event_loop = False
                 break
+
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_p:
+                    pause()
+                if event.key == pg.K_ESCAPE:
+                    pause()
 
         pg.display.update()
 
