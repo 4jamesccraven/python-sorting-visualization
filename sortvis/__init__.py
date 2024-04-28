@@ -1,5 +1,3 @@
-from sortvis.abc import SortAlgoVis
+import insertion
 
-
-class Insertion(SortAlgoVis):
-    ...
+__all__ = ['insertion']
