@@ -1,6 +1,6 @@
 import pygame as pg
 import sortvis
-from random import randint
+from random import shuffle
 from dataclasses import dataclass
 
 
@@ -17,6 +17,9 @@ class drawable:
 def render_curr_state(state: list[tuple[int, pg.Color]],
                       draw: drawable,
                       WINDOW: pg.Surface) -> None:
+    '''
+    Renders the state of the algorithm generator
+    '''
     for i, vals in enumerate(state):
         val, color = vals
 
@@ -66,15 +69,19 @@ def main() -> None:
     choose_algo = True
     event_loop: bool = True
     while event_loop:
+        # Allows maximum of 120 FPS
         clock.tick(120)
+
+        # Makes background and display area
         pg.display.get_surface().fill((255, 255, 255))
         pg.draw.rect(WINDOW, (207, 210, 211), vis_space, border_radius=25)
 
         # TO BE IMPLEMENTED: SELECTABLE ALGORITHM
         if choose_algo:
             choose_algo = False
-            list = [randint(0, 100) for _ in range(100)]
-            algorithm = sortvis.insertion.Insertion(list).vis_steps()
+            list = [i for i in range(100)]
+            shuffle(list)
+            algorithm = sortvis.bubble(list)
             ...
 
         if not visualisation_done and not choose_algo:
