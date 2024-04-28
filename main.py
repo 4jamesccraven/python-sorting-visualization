@@ -1,5 +1,6 @@
 import pygame as pg
 import sortvis
+from sortvis import SORTED
 from random import shuffle
 from dataclasses import dataclass
 
@@ -97,7 +98,7 @@ def main() -> None:
             choose_algo = False
             list = [i for i in range(1, 101)]
             shuffle(list)
-            algorithm = sortvis.merge(list)
+            algorithm = sortvis.radix(list)
             ...
 
         # Visualization in progress
@@ -107,7 +108,7 @@ def main() -> None:
                 render_curr_state(curr_state, draw, WINDOW)
             except StopIteration:
                 visualisation_done = True
-                prev_state = [(val, pg.Color(255, 255, 255)) for val in list]
+                prev_state = [(val, SORTED) for val in list]
 
         # Continue rendering sorted values waiting for user
         else:
