@@ -19,15 +19,16 @@ class drawable:
 
 def render_curr_state(state: list[tuple[int, pg.Color]],
                       draw: drawable,
-                      WINDOW: pg.Surface) -> None:
+                      WINDOW: pg.Surface,
+                      num_elems: int = 100) -> None:
     '''
     Renders the state of the algorithm generator
     '''
     for i, vals in enumerate(state):
         val, color = vals
 
-        height = int((val / 100) * draw.height)
-        width = draw.width // 100
+        height = int((val / num_elems) * draw.height)
+        width = draw.width // num_elems
 
         rect = pg.rect.Rect(draw.left + (i * width),
                             draw.top + (draw.height - height),
@@ -94,9 +95,9 @@ def main() -> None:
         # TO BE IMPLEMENTED: SELECTABLE ALGORITHM
         if choose_algo:
             choose_algo = False
-            list = [i for i in range(100)]
+            list = [i for i in range(1, 101)]
             shuffle(list)
-            algorithm = sortvis.selection(list)
+            algorithm = sortvis.merge(list)
             ...
 
         # Visualization in progress
