@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generator
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from pygame import Color
+from pygame import Color
 
 
 class SortAlgoVis(ABC):
@@ -12,6 +10,7 @@ class SortAlgoVis(ABC):
         super().__init__()
         if len(vals) != 100 or not isinstance(vals, list):
             raise ValueError('Argument should be a list of ints with size 100')
+        self.vals = vals
 
     @abstractmethod
     def vis_steps(self) -> Generator[list[tuple[int, Color]], None, None]:
