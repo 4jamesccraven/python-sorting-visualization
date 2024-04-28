@@ -5,6 +5,16 @@ from random import shuffle
 from dataclasses import dataclass
 
 
+ALGORITHMS = {1: sortvis.insertion,
+              2: sortvis.bubble,
+              3: sortvis.quick,
+              4: sortvis.radix,
+              5: sortvis.selection,
+              6: sortvis.merge,
+              7: sortvis.heap,
+              8: sortvis.bogo}
+
+
 @dataclass
 class drawable:
     '''
@@ -50,8 +60,71 @@ def pause() -> None:
                 if event.key == pg.K_ESCAPE or event.key == pg.K_p:
                     return
 
+            if event.type == pg.QUIT:
+                quit()
+
+
+def render_menu(draw: drawable,
+                WINDOW: pg.Surface,
+                color: pg.color,
+                font: pg.font.Font) -> list[pg.rect.Rect]:
+    '''
+    Renders the algorithm selection menu
+    '''
+    button_width = int((draw.width // 2) * 0.9)
+    button_height = int((draw.height // 4) * 0.9)
+    padding_x = int((draw.width // 2) * 0.05)
+    padding_y = int((draw.height // 2) * 0.05)
+
+    buttons: list[tuple[int, int]] = [
+        (padding_x, padding_y),
+        (padding_x, padding_y + (button_height + padding_y)),
+        (padding_x, padding_y + 2 * (button_height + padding_y)),
+        (padding_x, padding_y + 3 * (button_height + padding_y)),
+        (2 * padding_x + (button_width + padding_x), padding_y),
+        (2 * padding_x + (button_width + padding_x),
+         padding_y + (button_height + padding_y)),
+        (2 * padding_x + (button_width + padding_x),
+         padding_y + 2 * (button_height + padding_y)),
+        (2 * padding_x + (button_width + padding_x),
+         padding_y + 3 * (button_height + padding_y))
+    ]
+
+    buttons = [(val[0] + draw.left, val[1] + draw.top) for val in buttons]
+
+    buttons = [pg.rect.Rect(val[0],
+                            val[1],
+                            button_width,
+                            button_height)
+               for val in buttons]
+
+    for button in buttons:
+        pg.draw.rect(WINDOW, color, button, border_radius=15)
+
+    button_titles = ['Insertion',
+                     'Bubble',
+                     'Quick',
+                     'Radix',
+                     'Selection',
+                     'Merge',
+                     'Heap',
+                     'Bogo'
+                     ]
+
+    button_titles = [font.render(title, True, pg.Color(0, 0, 0))
+                     for title in button_titles]
+
+    for rect, title in zip(buttons, button_titles):
+        text_rect = title.get_rect(center=rect.center)
+
+        WINDOW.blit(title, text_rect)
+
+    return buttons
+
 
 def main() -> None:
+    pg.init()
+
     # Pseudo Globals
     SCREEN_HEIGHT = 800
     SCREEN_W_RATIO, SCREEN_H_RATIO = (16, 9)
@@ -63,6 +136,7 @@ def main() -> None:
     WINDOW = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
                                  flags=SCREEN_FLAGS,
                                  vsync=1)
+    FONT = pg.font.SysFont("Arial", 36)
     clock = pg.time.Clock()
 
     # A rectangle to hold the data to be displayed
@@ -81,6 +155,7 @@ def main() -> None:
                     height=(vis_space.bottom - vis_space.top) - 50,
                     )
 
+    algo = 0
     curr_state = None
     visualisation_done = False
     choose_algo = True
@@ -95,20 +170,25 @@ def main() -> None:
 
         # TO BE IMPLEMENTED: SELECTABLE ALGORITHM
         if choose_algo:
-            choose_algo = False
-            list = [i for i in range(1, 101)]
-            shuffle(list)
-            algorithm = sortvis.radix(list)
-            ...
+            if algo == 0:
+                buttons = render_menu(draw, WINDOW,
+                                      pg.Color(255, 255, 255),
+                                      FONT)
+            else:
+                num_elems: int = 100 if algo != 8 else 7
+                array = [i for i in range(1, num_elems + 1)]
+                shuffle(array)
+                algorithm: callable = ALGORITHMS[algo](array)
+                choose_algo = False
 
         # Visualization in progress
-        if not visualisation_done and not choose_algo:
+        elif not visualisation_done and not choose_algo:
             try:
                 curr_state = next(algorithm)
                 render_curr_state(curr_state, draw, WINDOW)
             except StopIteration:
                 visualisation_done = True
-                prev_state = [(val, SORTED) for val in list]
+                prev_state = [(val, SORTED) for val in array]
 
         # Continue rendering sorted values waiting for user
         else:
@@ -125,6 +205,19 @@ def main() -> None:
                     pause()
                 if event.key == pg.K_ESCAPE:
                     pause()
+                if event.key == pg.K_r:
+                    choose_algo = True
+                    break
+                if event.key == pg.K_n:
+                    choose_algo = True
+                    algo = 0
+                    break
+
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for idx, button in enumerate(buttons, start=1):
+                        if button.collidepoint(event.pos):
+                            algo = idx
 
         pg.display.update()
 
