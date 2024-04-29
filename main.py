@@ -49,7 +49,7 @@ def render_curr_state(state: list[tuple[int, pg.Color]],
         pg.draw.rect(WINDOW, color, rect)
 
 
-def pause() -> None:
+def pause() -> bool:
     '''
     Pauses the program.
     '''
@@ -58,10 +58,10 @@ def pause() -> None:
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE or event.key == pg.K_p:
-                    return
+                    return True
 
             if event.type == pg.QUIT:
-                quit()
+                return False
 
 
 def render_menu(draw: drawable,
@@ -225,9 +225,9 @@ def main() -> None:
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_p:
-                    pause()
+                    event_loop = pause()
                 if event.key == pg.K_ESCAPE:
-                    quit()
+                    event_loop = False
                 # Reset current algorithm
                 if event.key == pg.K_r:
                     choose_algo = True
