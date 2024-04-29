@@ -130,6 +130,7 @@ def main() -> None:
     SCREEN_W_RATIO, SCREEN_H_RATIO = (16, 9)
     SCREEN_WIDTH = (SCREEN_HEIGHT * SCREEN_W_RATIO) // SCREEN_H_RATIO
     SCREEN_FLAGS = pg.SCALED
+    SPEED = 120
 
     # Initialise the window
     pg.display.set_caption('Algorithm Visualizer - James Craven')
@@ -137,7 +138,12 @@ def main() -> None:
                                  flags=SCREEN_FLAGS,
                                  vsync=1)
     FONT = pg.font.SysFont("Arial", 36)
-    clock = pg.time.Clock()
+    LEGEND_FONT = pg.font.SysFont('Arial', 24)
+
+    icon = pg.image.load('icon.png')
+    pg.display.set_icon(icon)
+
+    CLOCK = pg.time.Clock()
 
     # A rectangle to hold the data to be displayed
     vis_space = pg.rect.Rect(SCREEN_WIDTH // 7,
@@ -155,20 +161,37 @@ def main() -> None:
                     height=(vis_space.bottom - vis_space.top) - 50,
                     )
 
+    # A rectangle to hold the legend
+    legend_space = pg.rect.Rect(draw.left - 25,
+                                25,
+                                draw.width + 50,
+                                (SCREEN_HEIGHT // 21) * 2)
+
+    event_loop: bool = True
+    choose_algo = True
+    visualisation_done = False
     algo = 0
     curr_state = None
-    visualisation_done = False
-    choose_algo = True
-    event_loop: bool = True
     while event_loop:
-        # Allows maximum of 120 FPS
-        clock.tick(120)
+        # Allows maximum of SPEED FPS
+        CLOCK.tick(SPEED)
 
         # Makes background and display area
         pg.display.get_surface().fill((255, 255, 255))
         pg.draw.rect(WINDOW, (207, 210, 211), vis_space, border_radius=25)
+        pg.draw.rect(WINDOW, (207, 210, 211), legend_space, border_radius=15)
 
-        # TO BE IMPLEMENTED: SELECTABLE ALGORITHM
+        # Make legend
+        legend_surface = LEGEND_FONT.render('R: Reset current algorithm    '
+                                            'N: Select new algorithm    '
+                                            'P: Pause program   '
+                                            'ESC: Exit',
+                                            True,
+                                            pg.Color(0, 0, 0))
+        legend_rect = legend_surface.get_rect(center=legend_space.center)
+        WINDOW.blit(legend_surface, legend_rect)
+
+        # User selects algorithm
         if choose_algo:
             if algo == 0:
                 buttons = render_menu(draw, WINDOW,
@@ -185,14 +208,14 @@ def main() -> None:
         elif not visualisation_done and not choose_algo:
             try:
                 curr_state = next(algorithm)
-                render_curr_state(curr_state, draw, WINDOW)
+                render_curr_state(curr_state, draw, WINDOW, num_elems)
             except StopIteration:
                 visualisation_done = True
                 prev_state = [(val, SORTED) for val in array]
 
         # Continue rendering sorted values waiting for user
         else:
-            render_curr_state(prev_state, draw, WINDOW)
+            render_curr_state(prev_state, draw, WINDOW, num_elems)
 
         # Input handling
         for event in pg.event.get():
@@ -204,12 +227,16 @@ def main() -> None:
                 if event.key == pg.K_p:
                     pause()
                 if event.key == pg.K_ESCAPE:
-                    pause()
+                    quit()
+                # Reset current algorithm
                 if event.key == pg.K_r:
                     choose_algo = True
+                    visualisation_done = False
                     break
+                # Select new algorithm
                 if event.key == pg.K_n:
                     choose_algo = True
+                    visualisation_done = False
                     algo = 0
                     break
 
